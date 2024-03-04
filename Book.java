@@ -1,31 +1,34 @@
 package ocLMS;
 
 /*
- * Brady Craig, Software Development 1, 01-27-2024
+ * Brady Craig, Software Development 1, 03-02-2024
  * 
  * Book Class
  * 
- * Used to give books identifiable attributes such as id, title, and author.
+ * Used to give books identifiable attributes such as barcode, title, author and checked out/in status.
  * Used to store book data in LMS.
  */
 public class Book {
-    private int id;
+    private int barcode;
     private String title;
     private String author;
+    private boolean checkedOut;
 
     public Book(int id, String title, String author) {
-        this.id = id;
+        this.barcode = id;
         this.title = title;
         this.author = author;
+        this.checkedOut = false; 
     }
 
-    public int getBookId() {
-        return id;
+    public int getBarcode() {
+        return barcode;
     }
 
-    public void setBookId(int id) {
-        this.id = id;
+    public void setBarcode(int barcode) {
+        this.barcode = barcode;
     }
+
 
     public String getBookTitle() {
         return title;
@@ -42,9 +45,17 @@ public class Book {
     public void setAuthorName(String author) {
         this.author = author;
     }
+    
+    public boolean isCheckedOut() {
+        return checkedOut;
+    }
+
+    public void setCheckedOut(boolean checkedOut) {
+        this.checkedOut = checkedOut;
+    }
 
     @Override
     public String toString() {
-        return id + "," + title + "," + author;
+        return "Barcode: " + barcode + "," + "Title: " + title + "," + "Author: " + author + "," + "Status: "  + checkedOut;
     }
 }
