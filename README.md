@@ -2,7 +2,7 @@
 
 ## Overview
 
-The OC Library Management System (LMS) is a console-based application designed to manage a library's collection of books. It allows users to add new books, remove books by barcode or title, check out books, check in books, and list all books in the collection.
+The OC Library Management System (LMS) is a console-based application designed to manage the library's collection of books. It allows users to add new books, remove books by barcode or title, check out books, check in books, and list all books in the collection.
 
 ## Features
 
