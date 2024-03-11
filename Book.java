@@ -1,7 +1,9 @@
 package ocLMS;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 /*
- * Brady Craig, Software Development 1, 03-02-2024
+ * Brady Craig, Software Development 1, 03-09-2024
  * 
  * Book Class
  * 
@@ -13,12 +15,14 @@ public class Book {
     private String title;
     private String author;
     private boolean checkedOut;
+    private LocalDate dueDate;
 
     public Book(int id, String title, String author) {
         this.barcode = id;
         this.title = title;
         this.author = author;
-        this.checkedOut = false; 
+        this.checkedOut = false;
+        this.dueDate = null; // Default value
     }
 
     public int getBarcode() {
@@ -53,9 +57,20 @@ public class Book {
     public void setCheckedOut(boolean checkedOut) {
         this.checkedOut = checkedOut;
     }
+    
+    public void setDueDate(LocalDate localDate) {
+        this.dueDate = LocalDate.now().plusDays(7);
+    }
+    
+    public LocalDate getDueDate() {
+        return dueDate;
+    }
 
     @Override
     public String toString() {
-        return "Barcode: " + barcode + "," + "Title: " + title + "," + "Author: " + author + "," + "Status: "  + checkedOut;
+    	String status = checkedOut ? "Checked Out" : "Checked In";
+    	String dueDateStr = (dueDate != null) ? dueDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")) : "N/A";
+        return "Barcode: " + barcode + ", " + " Title: " + title + ", " + " Author: " + author + ", " + " Status: "  + status + ", " + "Due Date: " + dueDateStr;
     }
+
 }

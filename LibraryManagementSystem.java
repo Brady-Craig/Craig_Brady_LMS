@@ -1,10 +1,11 @@
 package ocLMS;
 
 import java.util.List;
+import java.time.LocalDate;
 import java.util.Iterator;
 
 /*
- * Brady Craig, Software Development 1, 03-02-2024
+ * Brady Craig, Software Development 1, 03-09-2024
  * 
  * LibraryManagementSystem Class
  * 
@@ -83,7 +84,8 @@ public class LibraryManagementSystem {
             if (book.getBookTitle().equals(title)) {
                 if (!book.isCheckedOut()) {
                     book.setCheckedOut(true);
-                    System.out.println("Book \"" + title + "\" checked out successfully.");
+                    book.setDueDate(LocalDate.now().plusDays(7));
+                    System.out.println("Book \"" + title + "\" checked out successfully. Due date: " + book.getDueDate());
                 } else {
                     System.out.println("Book \"" + title + "\" is already checked out.");
                 }
@@ -124,10 +126,11 @@ public class LibraryManagementSystem {
      * Utilizes filePath to determine specific text file.
      */
     	
-    public void listBookCollection() {
+    public List<Book> listBookCollection() {
         for (Book book : bookCollection) {
             System.out.println(book);
         }
+		return bookCollection;
     }
     /*
      * duplicateBookCheck Method
