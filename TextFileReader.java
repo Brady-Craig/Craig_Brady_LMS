@@ -1,4 +1,4 @@
-package ocLMS;
+package application;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /*
- * Brady Craig, Software Development 1, 03-02-2024
+ * Brady Craig, Software Development 1, 03-23-2024
  * 
  * TextFileReader Class
  * 

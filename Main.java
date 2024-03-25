@@ -1,10 +1,10 @@
-package ocLMS;
+package application;
 
 import java.util.Scanner;
 import java.util.ArrayList;
 
 /*
- * Brady Craig, Software Development 1, 03-02-2024
+ * Brady Craig, Software Development 1, 03-23-2024
  * 
  * Main Class
  * 
