@@ -1,76 +1,104 @@
 package application;
+
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+
+import javafx.beans.property.*;
 
 /*
- * Brady Craig, Software Development 1, 03-23-2024
+ * Brady Craig, Software Development 1, 04-07-2024
  * 
  * Book Class
  * 
- * Used to give books identifiable attributes such as barcode, title, author and checked out/in status.
- * Used to store book data in LMS.
+ * Used to give books identifiable property attributes such as barcode, title, author, genre and checked out/in status. 
+ * Updated book class to utilize Property data types so TableView could be used in the GUI.
+ * Used to store book data in LMS database.
  */
 public class Book {
-    private int barcode;
-    private String title;
-    private String author;
-    private boolean checkedOut;
-    private LocalDate dueDate;
+    private final IntegerProperty barcode;
+    private final StringProperty title;
+    private final StringProperty author;
+    private final StringProperty genre;
+    private final BooleanProperty checkedOut;
+    private final ObjectProperty<LocalDate> dueDate;
 
-    public Book(int id, String title, String author) {
-        this.barcode = id;
-        this.title = title;
-        this.author = author;
-        this.checkedOut = false;
-        this.dueDate = null; // Default value
+    public Book(int barcode, String title, String author, String genre, boolean checkedOut, LocalDate dueDate) {
+        this.barcode = new SimpleIntegerProperty(barcode);
+        this.title = new SimpleStringProperty(title);
+        this.author = new SimpleStringProperty(author);
+        this.genre = new SimpleStringProperty(genre);
+        this.checkedOut = new SimpleBooleanProperty(checkedOut);
+        this.dueDate = new SimpleObjectProperty<>(dueDate);
     }
 
-    public int getBarcode() {
+    public IntegerProperty barcodeProperty() {
         return barcode;
     }
 
-    public void setBarcode(int barcode) {
-        this.barcode = barcode;
+    public int getBarcode() {
+        return barcode.get();
     }
 
+    public void setBarcode(int barcode) {
+        this.barcode.set(barcode);
+    }
 
-    public String getBookTitle() {
+    public StringProperty titleProperty() {
         return title;
     }
 
-    public void setBookTitle(String title) {
-        this.title = title;
+    public String getBookTitle() {
+        return title.get();
     }
 
-    public String getAuthorName() {
+    public void setBookTitle(String title) {
+        this.title.set(title);
+    }
+
+    public StringProperty authorProperty() {
         return author;
     }
 
-    public void setAuthorName(String author) {
-        this.author = author;
+    public String getAuthorName() {
+        return author.get();
     }
-    
-    public boolean isCheckedOut() {
+
+    public void setAuthorName(String author) {
+        this.author.set(author);
+    }
+
+    public StringProperty genreProperty() {
+        return genre;
+    }
+
+    public String getGenre() {
+        return genre.get();
+    }
+
+    public void setGenre(String genre) {
+        this.genre.set(genre);
+    }
+
+    public BooleanProperty checkedOutProperty() {
         return checkedOut;
     }
 
+    public boolean isCheckedOut() {
+        return checkedOut.get();
+    }
+
     public void setCheckedOut(boolean checkedOut) {
-        this.checkedOut = checkedOut;
+        this.checkedOut.set(checkedOut);
     }
-    
-    public void setDueDate(LocalDate localDate) {
-        this.dueDate = LocalDate.now().plusDays(7);
-    }
-    
-    public LocalDate getDueDate() {
+
+    public ObjectProperty<LocalDate> dueDateProperty() {
         return dueDate;
     }
 
-    @Override
-    public String toString() {
-    	String status = checkedOut ? "Checked Out" : "Checked In";
-    	String dueDateStr = (dueDate != null) ? dueDate.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")) : "N/A";
-        return "Barcode: " + barcode + ", " + " Title: " + title + ", " + " Author: " + author + ", " + " Status: "  + status + ", " + "Due Date: " + dueDateStr;
+    public LocalDate getDueDate() {
+        return dueDate.get();
     }
 
+    public void setDueDate(LocalDate dueDate) {
+        this.dueDate.set(dueDate);
+    }
 }

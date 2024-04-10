@@ -1,6 +1,6 @@
 package application;
-
 import javafx.application.Application;
+import javafx.collections.*;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -11,27 +11,24 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.*;
+import java.time.LocalDate;
 
 /*
- * Brady Craig, Software Development 1, 03-23-2024
- * 
+ * Brady Craig, Software Development 1, 04-07-2024
+ *
  * LibraryManagementSystemGUI Class
- * 
- * Creates a JavaFX GUI for the OC LMS. Allows use to list all books in collection, delete books from collection by barcode and title, adds books by text files, checks books in and out.
+ *
+ * Creates a JavaFX GUI/interface with OC_LMS database for the OC LMS application. Allows user to list all books in database, delete books from database by barcode and title, adds books by text files, checks books in and out.
  */
 public class LibraryManagementSystemGUI extends Application {
-    private LibraryManagementSystem lms;
-    private TextArea bookCollectionTextArea;
+    private Connection connection;
+    private TableView<Book> bookTableView;
 
     @Override
     public void start(Stage primaryStage) {
-
-        List<Book> bookCollection = new ArrayList<>();
-
-        // Initialize LibraryManagementSystem with book collection
-        lms = new LibraryManagementSystem(bookCollection);
+        connectToDatabase(); // Connect to SQLite database
+        createTable(); 
 
         Label fileLabel = new Label("File Name:");
         TextField fileTextField = new TextField();
@@ -51,12 +48,24 @@ public class LibraryManagementSystemGUI extends Application {
         Button checkinBtn = new Button("Check In");
         Button exitBtn = new Button("Exit");
         
-     // Create TextArea for displaying book collection in GUI
-        bookCollectionTextArea = new TextArea();
-        bookCollectionTextArea.setEditable(false);
-        bookCollectionTextArea.setWrapText(true);
-        
-        
+        //Use TableView to display database data in a formatted table
+        bookTableView = new TableView<>();
+        bookTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        TableColumn<Book, Integer> barcodeColumn = new TableColumn<>("Barcode");
+        barcodeColumn.setCellValueFactory(data -> data.getValue().barcodeProperty().asObject());
+        TableColumn<Book, String> titleColumn = new TableColumn<>("Title");
+        titleColumn.setCellValueFactory(data -> data.getValue().titleProperty());
+        TableColumn<Book, String> authorColumn = new TableColumn<>("Author");
+        authorColumn.setCellValueFactory(data -> data.getValue().authorProperty());
+        TableColumn<Book, String> genreColumn = new TableColumn<>("Genre");
+        genreColumn.setCellValueFactory(data -> data.getValue().genreProperty());
+        TableColumn<Book, String> statusColumn = new TableColumn<>("Status");
+        statusColumn.setCellValueFactory(data -> data.getValue().checkedOutProperty().asString());
+        TableColumn<Book, LocalDate> dueDateColumn = new TableColumn<>("Due Date");
+        dueDateColumn.setCellValueFactory(data -> data.getValue().dueDateProperty());
+        bookTableView.getColumns().addAll(barcodeColumn, titleColumn, authorColumn, genreColumn, statusColumn, dueDateColumn);
+
+
         String backgroundColor = "-fx-background-color: #055db0;";
         String buttonColor = "-fx-background-color: #607D8B; -fx-text-fill: white;";
         String labelStyle = "-fx-text-fill: white;";
@@ -75,44 +84,43 @@ public class LibraryManagementSystemGUI extends Application {
         checkinBtn.setStyle(buttonColor);
         exitBtn.setStyle(buttonColor);
 
-     // Button Action handlers
         addBtn.setOnAction(e -> {
             String fileName = fileTextField.getText();
-            lms.addBooksByFile(fileName);
-            
+            addBooksByFile(fileName);
+
         });
 
+       
         printBtn.setOnAction(e -> {
-            updateBookCollectionTextArea();
+            updateBookTableView();
         });
 
         RemoveBarcodeBtn.setOnAction(e -> {
             int barcode = Integer.parseInt(barcodeTextField.getText());
-            lms.deleteBookByBarcode(barcode);
-           
+            deleteBookByBarcode(barcode);
+
         });
 
         removeTitleBtn.setOnAction(e -> {
             String title = titleTextField.getText();
-            lms.deleteBookByTitle(title);
-            
+            deleteBookByTitle(title);
+
         });
 
         checkoutBtn.setOnAction(e -> {
-            String title = checkoutTextField.getText();
-            lms.checkOutBook(title);
-            
+            int barcode = Integer.parseInt(checkoutTextField.getText());
+            checkOutBook(barcode);
+
         });
 
         checkinBtn.setOnAction(e -> {
-            String title = checkinTextField.getText();
-            lms.checkInBook(title);
-           
+            int barcode = Integer.parseInt(checkinTextField.getText());
+            checkInBook(barcode);
+
         });
 
         exitBtn.setOnAction(e -> primaryStage.close());
 
-        // Set Grid layout for the GUI
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
         grid.setHgap(10);
@@ -120,8 +128,7 @@ public class LibraryManagementSystemGUI extends Application {
         grid.setPadding(new Insets(25, 25, 25, 25));
         grid.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
         grid.setStyle(backgroundColor);
-        
-        // Grid Components
+
         grid.add(fileLabel, 0, 0);
         grid.add(fileTextField, 1, 0);
         grid.add(addBtn, 2, 0);
@@ -139,28 +146,156 @@ public class LibraryManagementSystemGUI extends Application {
         grid.add(checkinTextField, 1, 4);
         grid.add(checkinBtn, 2, 4);
         grid.add(exitBtn, 1, 5);
-        grid.add(bookCollectionTextArea, 0, 6, 4, 1);
+        grid.add(bookTableView, 0, 6, 4, 1);
 
-        // Set scene and show stage
         Scene scene = new Scene(grid, 600, 400);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Orange County Library Management System");
         primaryStage.show();
     }
-   
+
     public static void main(String[] args) {
         launch(args);
     }
-    private void updateBookCollectionTextArea() {
-        bookCollectionTextArea.setText(formatBookList(lms.listBookCollection()));
+
+    private void connectToDatabase() {
+        try {
+            // Load SQLite JDBC driver
+            Class.forName("org.sqlite.JDBC");
+
+            // SQLite connection string
+            String url = "jdbc:sqlite:/Users/bradycraig/Desktop/sqlite/db/OC_LMS.sqlite";
+
+            // Create a connection to the database
+            connection = DriverManager.getConnection(url);
+            System.out.println("Connected to SQLite database.");
+        } catch (ClassNotFoundException e) {
+            System.out.println("SQLite JDBC driver not found.");
+            e.printStackTrace();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
-    private String formatBookList(List<Book> bookList) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("Book Collection:\n");
-        for (Book book : bookList) {
-            builder.append(book.toString()).append("\n");
+    private void createTable() {
+        // SQL statement for creating a new table
+        String sql = "CREATE TABLE IF NOT EXISTS books (\n"
+                + "    barcode INTEGER PRIMARY KEY,\n"
+                + "    title TEXT NOT NULL,\n"
+                + "    author TEXT NOT NULL,\n"
+                + "    genre TEXT,\n"
+                + "    status TEXT NOT NULL,\n"
+                + "    due_date DATE\n"
+                + ");";
+
+        try (Statement statement = connection.createStatement()) {
+            // Create books table
+            statement.execute(sql);
+            System.out.println("Books table created successfully.");
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
         }
-        return builder.toString();
+    }
+
+    private void addBooksByFile(String fileName) {
+        // Decide on what to do with this section
+    }
+
+    private void deleteBookByBarcode(int barcode) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM books WHERE barcode = ?");
+            preparedStatement.setInt(1, barcode);
+            int rowsAffected = preparedStatement.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Book with barcode " + barcode + " removed successfully.");
+                // Update UI to reflect the deletion, such as refreshing the TableView
+                updateBookTableView();
+            } else {
+                System.out.println("No book found with barcode " + barcode + ".");
+            }
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    //Delete Book by barcode
+    private void deleteBookByTitle(String title) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM books WHERE title = ?");
+            preparedStatement.setString(1, title);
+            int rowsAffected = preparedStatement.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Book with title \"" + title + "\" removed successfully.");
+                // Update UI to reflect the deletion, such as refreshing the TableView
+                updateBookTableView();
+            } else {
+                System.out.println("No book found with title \"" + title + "\".");
+            }
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    //Check-Out Book by Barcode
+    private void checkOutBook(int barcode) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("UPDATE books SET status = ?, due_date = ? WHERE barcode = ?");
+            preparedStatement.setString(1, "Checked Out");
+            preparedStatement.setDate(2, Date.valueOf(LocalDate.now().plusDays(7))); // Assuming the due date is set to 7 days from today
+            preparedStatement.setInt(3, barcode);
+            int rowsAffected = preparedStatement.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Book with barcode " + barcode + " checked out successfully.");
+                // Update UI to reflect the check-out, such as refreshing the TableView
+                updateBookTableView();
+            } else {
+                System.out.println("No book found with barcode " + barcode + ".");
+            }
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    // Check-In Book by Barcode
+    private void checkInBook(int barcode) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("UPDATE books SET status = ?, due_date = NULL WHERE barcode = ?");
+            preparedStatement.setString(1, "Checked In");
+            preparedStatement.setInt(2, barcode);
+            int rowsAffected = preparedStatement.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Book with barcode " + barcode + " checked in successfully.");
+                // Update UI to reflect the check-in, such as refreshing the TableView
+                updateBookTableView();
+            } else {
+                System.out.println("No book found with barcode " + barcode + ".");
+            }
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    //Update Book data in GUI table/Database
+    private void updateBookTableView() {
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM books");
+            ObservableList<Book> bookList = FXCollections.observableArrayList();
+            while (resultSet.next()) {
+                int barcode = resultSet.getInt("barcode");
+                String title = resultSet.getString("title");
+                String author = resultSet.getString("author");
+                String genre = resultSet.getString("genre");
+                boolean checkedOut = resultSet.getString("status").equals("Checked Out");
+                Date dueDateSQL = resultSet.getDate("due_date");
+                LocalDate dueDate = (dueDateSQL != null) ? dueDateSQL.toLocalDate() : null;
+
+                bookList.add(new Book(barcode, title, author, genre, checkedOut, dueDate));
+            }
+            bookTableView.setItems(bookList);
+            resultSet.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
