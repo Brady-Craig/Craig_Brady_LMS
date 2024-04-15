@@ -3,6 +3,7 @@ package application;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,8 +16,18 @@ import java.util.List;
  * Helps load book data in LMS
  */
 
-
+/**
+ * The TextFileReader class is responsible for reading book data from text files and creating book objects from the text file data.
+ * This class assists in loading book data into the Library Management System (LMS).
+ */
 public class TextFileReader {
+	
+	/**
+     * Reads book data from a text file and creates book objects.
+     *
+     * @param filePath The path of the text file to read.
+     * @return A list of Book objects created from the data in the text file.
+     */
     public static List<Book> readBookTextFile(String filePath) {
         List<Book> books = new ArrayList<>();
         //try will close BufferedReader even if there is an exception
@@ -30,7 +41,12 @@ public class TextFileReader {
                     int id = Integer.parseInt(elements[0]);
                     String title = elements[1];
                     String author = elements[2];
-                    Book book = new Book(id, title, author);
+                    String genre = elements[1];
+                    Boolean checkedOut = false;
+                    LocalDate dueDate = null;
+                    
+                    
+                    Book book = new Book(id, title, author, genre, checkedOut, dueDate );
                     books.add(book);
                 }
             }

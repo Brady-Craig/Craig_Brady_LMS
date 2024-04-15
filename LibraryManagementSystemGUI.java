@@ -15,17 +15,29 @@ import java.sql.*;
 import java.time.LocalDate;
 
 /*
- * Brady Craig, Software Development 1, 04-07-2024
+ * Brady Craig, Software Development 1, 04-14-2024
  *
  * LibraryManagementSystemGUI Class
  *
  * Creates a JavaFX GUI/interface with OC_LMS database for the OC LMS application. Allows user to list all books in database, delete books from database by barcode and title, adds books by text files, checks books in and out.
+ */
+
+/**
+ * Represents a JavaFX GUI/interface for the Orange County Library Management System (OC LMS) application.
+ * Allows users to interact with the OC_LMS database, listing all books, deleting books by barcode and title,
+ * adding books by text files, and checking books in and out.
  */
 public class LibraryManagementSystemGUI extends Application {
     private Connection connection;
     private TableView<Book> bookTableView;
 
     @Override
+    
+    /**
+     * Initializes and configures the JavaFX GUI components.
+     *
+     * @param primaryStage The primary stage of the JavaFX application.
+     */
     public void start(Stage primaryStage) {
         connectToDatabase(); // Connect to SQLite database
         createTable(); 
@@ -48,7 +60,11 @@ public class LibraryManagementSystemGUI extends Application {
         Button checkinBtn = new Button("Check In");
         Button exitBtn = new Button("Exit");
         
-        //Use TableView to display database data in a formatted table
+        /**
+         * Use TableView to display database data in a formatted table
+         *
+         * 
+         */
         bookTableView = new TableView<>();
         bookTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         TableColumn<Book, Integer> barcodeColumn = new TableColumn<>("Barcode");
@@ -153,11 +169,18 @@ public class LibraryManagementSystemGUI extends Application {
         primaryStage.setTitle("Orange County Library Management System");
         primaryStage.show();
     }
-
+    /**
+     * Entry point of the application. Launches the JavaFX application.
+     *
+     * @param args The command-line arguments.
+     */
     public static void main(String[] args) {
         launch(args);
     }
 
+    /**
+     * Connects to the SQLite database.
+     */
     private void connectToDatabase() {
         try {
             // Load SQLite JDBC driver
@@ -177,6 +200,9 @@ public class LibraryManagementSystemGUI extends Application {
         }
     }
 
+    /**
+     * Creates the 'books' table in the database if it does not exist already.
+     */
     private void createTable() {
         // SQL statement for creating a new table
         String sql = "CREATE TABLE IF NOT EXISTS books (\n"
@@ -196,11 +222,19 @@ public class LibraryManagementSystemGUI extends Application {
             System.out.println(e.getMessage());
         }
     }
-
+    /**
+     * Adds books to the database by reading data from a text file.
+     *
+     * @param fileName The name of the text file containing book data.
+     */
     private void addBooksByFile(String fileName) {
         // Decide on what to do with this section
     }
-
+    /**
+     * Deletes a book from the database by its barcode.
+     *
+     * @param barcode The barcode of the book to delete.
+     */
     private void deleteBookByBarcode(int barcode) {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM books WHERE barcode = ?");
@@ -218,7 +252,11 @@ public class LibraryManagementSystemGUI extends Application {
             e.printStackTrace();
         }
     }
-    //Delete Book by barcode
+    /**
+     * Deletes a book from the database by its title.
+     *
+     * @param barcode The title of the book to delete.
+     */
     private void deleteBookByTitle(String title) {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM books WHERE title = ?");
@@ -236,7 +274,11 @@ public class LibraryManagementSystemGUI extends Application {
             e.printStackTrace();
         }
     }
-    //Check-Out Book by Barcode
+    /**
+     * Checks out a book from the database by its barcode.
+     *
+     * @param barcode The books status is updated.
+     */
     private void checkOutBook(int barcode) {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("UPDATE books SET status = ?, due_date = ? WHERE barcode = ?");
@@ -256,7 +298,11 @@ public class LibraryManagementSystemGUI extends Application {
             e.printStackTrace();
         }
     }
-    // Check-In Book by Barcode
+    /**
+     * Checks in a book from the database by its barcode.
+     *
+     * @param barcode The books status is updated.
+     */
     private void checkInBook(int barcode) {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("UPDATE books SET status = ?, due_date = NULL WHERE barcode = ?");
@@ -275,7 +321,11 @@ public class LibraryManagementSystemGUI extends Application {
             e.printStackTrace();
         }
     }
-    //Update Book data in GUI table/Database
+    /**
+     * Updates the book database in real time.
+     *
+     * @param the book table is updated.
+     */
     private void updateBookTableView() {
         try {
             Statement statement = connection.createStatement();

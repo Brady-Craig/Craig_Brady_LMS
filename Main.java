@@ -12,7 +12,17 @@ import java.util.ArrayList;
  * Initializes LMS program.
  */
 
+
+/**
+ * Represents the entry point of the Library Management System (LMS) program.
+ * Presents an operation menu to the user and initializes the LMS program.
+ */
 public class Main {
+	/**
+     * The main method of the program. Starts the LMS and presents the operation menu to the user.
+     *
+     * @param args The command-line arguments.
+     */
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         ArrayList<Book> bookCollection = new ArrayList<>();
@@ -72,7 +82,13 @@ public class Main {
 
     scanner.close();
     }
-
+    
+    /**
+     * Removes a book from the LMS by its barcode.
+     *
+     * @param lms     The LibraryManagementSystem instance.
+     * @param scanner The Scanner object for user input.
+     */
 	 private static void removeBookByBarcode(LibraryManagementSystem lms, Scanner scanner) {
         System.out.print("Enter the barcode number to remove a book: ");
         int barcodeToRemove = scanner.nextInt();
@@ -85,7 +101,13 @@ public class Main {
         System.out.println("\nPrinting the updated database...\n");
         lms.listBookCollection();
     }
-
+	 
+	 /**
+	     * Removes a book from the LMS by its title.
+	     *
+	     * @param lms     The LibraryManagementSystem instance.
+	     * @param scanner The Scanner object for user input.
+	     */
     public static void removeBookByTitle(LibraryManagementSystem lms, Scanner scanner) {
         System.out.print("Enter the title to remove a book: ");
         String titleToRemove = scanner.nextLine();
@@ -97,7 +119,13 @@ public class Main {
         System.out.println("\nPrinting the updated database...\n");
         lms.listBookCollection();
     }
-
+    
+    /**
+     * Checks out a book from the LMS by its title.
+     *
+     * @param lms     The LibraryManagementSystem instance.
+     * @param scanner The Scanner object for user input.
+     */
     public static void checkOutBook(LibraryManagementSystem lms, Scanner scanner) {
         System.out.print("Enter the title to check out a book: ");
         String titleToCheckOut = scanner.nextLine();
@@ -109,7 +137,13 @@ public class Main {
         System.out.println("\nPrinting the updated database...\n");
         lms.listBookCollection();
     }
-
+    
+    /**
+     * Checks in a book to the LMS by its title.
+     *
+     * @param lms     The LibraryManagementSystem instance.
+     * @param scanner The Scanner object for user input.
+     */
     public static void checkInBook(LibraryManagementSystem lms, Scanner scanner) {
         System.out.print("Enter the title to check in a book: ");
         String titleToCheckIn = scanner.nextLine();
